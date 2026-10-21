@@ -7,6 +7,6 @@
 void setup_wifi();
 void connect_mqttServer();
 void callback(char* topic, byte* message, unsigned int length);
-void getCurrentTime(void);
+time_t getCurrentTime();
 
 #endif SETUP_H

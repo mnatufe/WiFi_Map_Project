@@ -1,4 +1,4 @@
-//Setup file -- Version 1.1.0
+//Setup file -- Version 1.2.0
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <freertos.h>
@@ -66,10 +66,6 @@ void callback(char* topic, byte* message, unsigned int length) {
 }
 
 //Get Time
-void getCurrentTime(void){
-  time_t rawtime;
-  struct tm * timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  return asctime(timeinfo);
+time_t getCurrentTime(){
+  return time(NULL);
 }

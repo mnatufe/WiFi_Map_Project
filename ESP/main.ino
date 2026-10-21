@@ -1,4 +1,4 @@
-//ESP32 Client Code ------ Version 1.2.0
+//ESP32 Client Code ------ Version 1.2.1
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <freertos.h>
@@ -10,7 +10,7 @@
 #define QUEUE_SIZE 5 
 
 const char* ssid = "[WIFI_SSID]";
-const char* password = "";
+const char* password = "[WIFI_PASSWORD]";
 const char* mqtt_server = "[IP_ADDR]";
 
 long lastMsg = 0;
@@ -24,30 +24,41 @@ TaskHandle_t sendRssiHandle = NULL;
 QueueHandle_t rssiQueue = NULL;
 
 //Use struct to hold RSSI values and timestamps
-struct RSSI_VALUES {
-  float timestamp;
-  float rssi;
+struct recvSignalStrength {
+  long timestamp;
+  long lastRssi;
 };
 
-RSSI_VALUES TIMESTAMPED_RSSI_VALUE[QUEUE_SIZE]; //Array to hold timestamped RSSI values
-
-
-void logRssi(void *argument){
+//Logs and sends timestamped RSSI values to queue
+void logRssi(void *pvParameters){
   for(;;){
 
-    long lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
+    recvSignalStrength rssiVals[QUEUE_SIZE][2]; //Array to hold  RSSI values and timestamps
+    lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
+    timestamp = getCurrentTime(); //Get current time since epoch (seconds)
+    for(uint8_t i = 0; i < QUEUE_SIZE; i++){
+      if(rssiVals[i][0].timestamp == 0){ //Check for empty slot in array
+        rssiVals[i][0].timestamp = timestamp;
+        rssiVals[i][1].lastRssi = lastRssi;
+        break;
+      }
+    }
+    char convertedVals [QUEUE_SIZE][2][20]; //Array to hold converted RSSI values and timestamps
+    snprintf(convertedVals[0][0], sizeof(convertedVals[0][0]), "%ld", lastRssi);
     //Log Received Signal Strength Indicator (RSSI) values in array with timestamps, pass down queue
 
     //Create loop to receive and log then send using below
-    xQueueSend(rssiQueue, &TIMESTAMPED_RSSI_VALUE, portMAXDELAY); //send timestamped values
+    if(xQueueSend(rssiQueue, &rssiVals, portMAXDELAY)){
+      //Timestamp and RSSI values sent to queue successfully
+    }; 
   }
 }
 
-void sendRssi(void *argument){
+void sendRssi(void *pvParameters){
   for(;;){
     //Create receiving array
     //Create loop to receive then store using below
-    xQueueReceive(TIMESTAMPED_RSSI_VALUE[i][j], &TIMESTAMPED_RSSI_VALUE, portMAXDELAY);
+    xQueueReceive(rssiQueue, &rssiVals, portMAXDELAY);
     //Pull rssi log, append device ID
     //Pass through MQTT to RPI 
     if (!client.connected()) {
@@ -59,8 +70,7 @@ void sendRssi(void *argument){
     long now = millis();
     if (now - lastMsg > 4000) {
       lastMsg = now;
-      client.publish("esp32/sensor2/temperature", temp);
-      client.publish("esp32/sensor2/humidity", hum);
+      client.publish("esp32/sensor1/rssi", rssiVals[i][j]);
       Serial.println("[MQTT] Published data");
     }
   }
