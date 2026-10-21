@@ -1,6 +1,11 @@
-//Setup file -- Version 1.0.0
-#include "setup.h"
+//Setup file -- Version 1.1.0
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <freertos.h>
 #include <stdio.h>
+#include "setup.h"
+#include <time.h>
+#include <Arduino.h>
 
 //Create wifi and MQTT connection
 void setup_wifi() {
@@ -58,4 +63,13 @@ void callback(char* topic, byte* message, unsigned int length) {
     Serial.print((char)message[i]);
   }
   Serial.println();
+}
+
+//Get Time
+void getCurrentTime(void){
+  time_t rawtime;
+  struct tm * timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  return asctime(timeinfo);
 }
