@@ -49,11 +49,7 @@ void sendRssi(void *pvParameters){
   recvSignalStrength rssiVals_R;
   //Create receiving array
   recvSignalStrength rssiBatch[QUEUE_SIZE];
-  for(;;){
-    
-    
-      
-    //Print received RSSI values and timestamps to serial monitor
+  for(;;){      
     for(uint8_t i = 0; i < QUEUE_SIZE; i++){
       //Receive RSSI values and timestamps from queue
       if(xQueueReceive(rssiQueue, &rssiVals_R, portMAX_DELAY)){
@@ -65,10 +61,9 @@ void sendRssi(void *pvParameters){
     //finish later gts
     
     //Convert RSSI values and timestamps to string format for MQTT publishing
-    char convertedVals [QUEUE_SIZE][2][20];
+    string rssiMsg = "";
     for(uint8_t i = 0; i < QUEUE_SIZE; i++){
-      snprintf(convertedVals[i][0], sizeof(convertedVals[i][0]), "%ld", rssiVals_R[i][0].timestamp);
-      snprintf(convertedVals[i][1], sizeof(convertedVals[i][1]), "%ld", rssiVals_R[i][1].lastRssi);
+      rssiMsg += String(DEVICE_ID) + "Timestamp: " + String(rssiBatch[i].timestamp) + ", RSSI: " + String(rssiBatch[i].lastRssi) + "\n";
     }
     //Append device ID to MQTT topic for publishing
     char mqttTopic[100];
@@ -84,7 +79,7 @@ void sendRssi(void *pvParameters){
     long now = millis();
     if (now - lastMsg > 4000) {
       lastMsg = now;
-      client.publish(mqttTopic, convertedVals[i][1]);
+      client.publish(mqttTopic, rssiMsg);
       Serial.println("[MQTT] Published data");
     }
   }
