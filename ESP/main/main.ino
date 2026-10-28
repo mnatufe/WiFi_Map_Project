@@ -1,10 +1,10 @@
-//ESP32 Client Code ------ Version 2.1.1
+//ESP32 Client Code ------ Version 2.1.2
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <Arduino_FreeRTOS.h>
 #include <stdio.h>
 #include "setup.h"
 #include <time.h>
+#include <Arduino.h>
 
 
 #define QUEUE_SIZE 5
@@ -37,8 +37,8 @@ void logRssi(void *pvParameters){
 
   for(;;){
 
-    lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
-    timestamp = getCurrentTime(); //Get current time since epoch (seconds)
+    rssiVals.lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
+    rssiVals.timestamp = getCurrentTime(); //Get current time since epoch (seconds)
     xQueueSend(rssiQueue, &rssiVals, portMAX_DELAY); //Send RSSI values and timestamps to queue
 
     vTaskDelay(100 / portTICK_PERIOD_MS); //Delay for 100 milliseconds
@@ -60,7 +60,7 @@ void sendRssi(void *pvParameters){
     }
     
     //Convert RSSI values and timestamps to string format for MQTT publishing
-    string rssiMsg = "";
+    char rssiMsg = "";
     for(uint8_t i = 0; i < QUEUE_SIZE; i++){
       rssiMsg += String(DEVICE_ID) + "Timestamp: " + String(rssiBatch[i].timestamp) + ", RSSI: " + String(rssiBatch[i].lastRssi) + "\n";
     }

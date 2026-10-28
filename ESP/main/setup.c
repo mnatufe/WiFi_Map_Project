@@ -1,7 +1,6 @@
 //Setup file -- Version 1.2.0
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <freertos.h>
 #include <stdio.h>
 #include "setup.h"
 #include <time.h>
