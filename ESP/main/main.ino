@@ -65,7 +65,7 @@ void sendRssi(void *pvParameters){
     snprintf(mqttTopic, sizeof(mqttTopic), "esp32/%s/rssi", DEVICE_ID);
 
     //Pass through MQTT to RPI 
-    if (!client.connected()) {
+    if (!client.connected()){
       connect_mqttServer();
       if(client.publish(mqttTopic, rssiMsg.c_str())){
         Serial.println("[MQTT] Published data");
@@ -95,4 +95,5 @@ void setup(){
 
 }
 void loop(){
+  //Empty
 }
