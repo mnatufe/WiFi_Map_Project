@@ -1,7 +1,7 @@
-//ESP32 Client Code ------ Version 2.0.1
+//ESP32 Client Code ------ Version 2.1.1
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <freertos.h>
+#include <Arduino_FreeRTOS.h>
 #include <stdio.h>
 #include "setup.h"
 #include <time.h>
