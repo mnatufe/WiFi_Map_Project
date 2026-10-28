@@ -1,4 +1,4 @@
-//ESP32 Client Code ------ Version 2.1.2
+//ESP32 Client Code ------ Version 2.2.0
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <stdio.h>
@@ -11,9 +11,9 @@
 #define DEVICE_ID "ESP32_1" 
 
 //Declare WiFi and MQTT parameters
-const char* ssid = "[WIFI_SSID]";
-const char* password = "[WIFI_PASSWORD]";
-const char* mqtt_server = "[IP_ADDR]";
+const char* ssid = "RPI_456";
+const char* password = "";
+const char* mqtt_server = "10.42.0.1";
 
 //Initialize last message time, WiFi client, and MQTT client
 long lastMsg = 0;
@@ -60,7 +60,7 @@ void sendRssi(void *pvParameters){
     }
     
     //Convert RSSI values and timestamps to string format for MQTT publishing
-    char rssiMsg = "";
+    String rssiMsg = "";
     for(uint8_t i = 0; i < QUEUE_SIZE; i++){
       rssiMsg += String(DEVICE_ID) + "Timestamp: " + String(rssiBatch[i].timestamp) + ", RSSI: " + String(rssiBatch[i].lastRssi) + "\n";
     }
