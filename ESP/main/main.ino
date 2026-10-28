@@ -23,8 +23,8 @@ QueueHandle_t rssiQueue = NULL;
 
 //Use struct to hold RSSI values and timestamps
 struct recvSignalStrength {
-  long timestamp;
-  long lastRssi;
+  int64_t timestamp;
+  int32_t lastRssi;
 };
 
 //Logs and sends timestamped RSSI values to queue
@@ -58,7 +58,7 @@ void sendRssi(void *pvParameters){
     //Convert RSSI values and timestamps to string format for MQTT publishing
     String rssiMsg = "";
     for(uint8_t i = 0; i < QUEUE_SIZE; i++){
-      rssiMsg += String(DEVICE_ID) + "Timestamp: " + String(rssiBatch[i].timestamp) + ", RSSI: " + String(rssiBatch[i].lastRssi) + "\n";
+      rssiMsg += String(DEVICE_ID) + "," + String((long long)rssiBatch[i].timestamp) + "," + String(rssiBatch[i].lastRssi) + "\n";
     }
     //Append device ID to MQTT topic for publishing
     char mqttTopic[100];
@@ -67,31 +67,32 @@ void sendRssi(void *pvParameters){
     //Pass through MQTT to RPI 
     if (!client.connected()){
       connect_mqttServer();
-      if(client.publish(mqttTopic, rssiMsg.c_str())){
-        Serial.println("[MQTT] Published data");
-      }
-      else{
-        Serial.println("[MQTT] Failed to publish data");
-      }
+    }
+    if(client.publish(mqttTopic, rssiMsg.c_str())){
+      Serial.println("[MQTT] Published data");
+    }
+    else{
+      Serial.println("[MQTT] Failed to publish data");
     }
 
     client.loop();
 
-    
+  }  
 }
 
 void setup(){
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server,1883);
+  client.setBufferSize(512);
   client.setCallback(callback);
 
   //Create Queue
   rssiQueue = xQueueCreate(QUEUE_SIZE,sizeof(struct recvSignalStrength));
 
   //Create freertos tasks
-  xTaskCreatePinnedToCore(logRssi, "logRssi", 1000, NULL, 1, &logRssiHandle, 1);
-  xTaskCreatePinnedToCore(sendRssi, "sendRssi", 1000, NULL, 1, &sendRssiHandle, 1);
+  xTaskCreatePinnedToCore(logRssi, "logRssi", 4096, NULL, 1, &logRssiHandle, 1);
+  xTaskCreatePinnedToCore(sendRssi, "sendRssi", 4096, NULL, 1, &sendRssiHandle, 1);
 
 }
 void loop(){

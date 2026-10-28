@@ -1,14 +1,15 @@
-//Setup file -- Version 1.3.0
+//Setup file -- Version 2.0.0
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <stdio.h>
 #include "setup.h"
 #include <time.h>
 #include <Arduino.h>
+#include <sys/time.h>
 
 
 //Declare WiFi and MQTT parameters
-const char* ssid = "RPI_456";
+const char* ssid = "rpi";
 const char* password = "";
 const char* mqtt_server = "10.42.0.1";
 
@@ -71,6 +72,9 @@ void callback(char* topic, byte* message, unsigned int length) {
 }
 
 //Get Time
-time_t getCurrentTime(){
-  return time(NULL);
+int64_t getCurrentTime(){
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+
+  return (int64_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
