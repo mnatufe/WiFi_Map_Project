@@ -1,4 +1,4 @@
-//ESP32 Client Code ------ Version 2.0.1
+//ESP32 Client Code ------ Version 2.1.0
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <freertos.h>
@@ -37,8 +37,8 @@ void logRssi(void *pvParameters){
 
   for(;;){
 
-    lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
-    timestamp = getCurrentTime(); //Get current time since epoch (seconds)
+    rssiVals.lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
+    rssiVals.timestamp = getCurrentTime(); //Get current time since epoch (seconds)
     xQueueSend(rssiQueue, &rssiVals, portMAX_DELAY); //Send RSSI values and timestamps to queue
 
     vTaskDelay(100 / portTICK_PERIOD_MS); //Delay for 100 milliseconds
@@ -58,7 +58,6 @@ void sendRssi(void *pvParameters){
         Serial.println("Data received from queue:");
       }
     }
-    //finish later gts
     
     //Convert RSSI values and timestamps to string format for MQTT publishing
     string rssiMsg = "";
