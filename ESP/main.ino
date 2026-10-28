@@ -9,15 +9,16 @@
 
 #define QUEUE_SIZE 5 
 
+//Declare WiFi and MQTT parameters
 const char* ssid = "[WIFI_SSID]";
 const char* password = "[WIFI_PASSWORD]";
 const char* mqtt_server = "[IP_ADDR]";
 
+//Initialize last message time, WiFi client, and MQTT client
 long lastMsg = 0;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-//Setup freertos tasks
 //Declare task handles
 TaskHandle_t logRssiHandle = NULL;
 TaskHandle_t sendRssiHandle = NULL;
