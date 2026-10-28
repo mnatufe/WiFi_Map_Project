@@ -54,10 +54,22 @@ void logRssi(void *pvParameters){
 }
 
 void sendRssi(void *pvParameters){
+  //Create receiving array
+  recvSignalStrength rssiVals_R[QUEUE_SIZE][2];
   for(;;){
-    //Create receiving array
-    //Create loop to receive then store using below
-    xQueueReceive(rssiQueue, &rssiVals, portMAXDELAY);
+    recvSignalStrength rssiVals;
+    //Receive RSSI values and timestamps from queue
+    if(xQueueReceive(rssiQueue, &rssiVals, portMAXDELAY)){
+      //RSSI values and timestamps received from queue successfully
+      Serial.println("Data received from queue:");
+      //Print received RSSI values and timestamps to serial monitor
+      for(uint8_t i = 0; i < QUEUE_SIZE; i++){
+        Serial.print("Timestamp: ");
+        Serial.print(rssiVals[i][0].timestamp);
+        Serial.print(" | RSSI: ");
+        Serial.println(rssiVals[i][1].lastRssi);
+      }
+    }
     //Pull rssi log, append device ID
     //Pass through MQTT to RPI 
     if (!client.connected()) {
@@ -82,7 +94,7 @@ void setup(){
   client.setCallback(callback);
 
   //Create Queue
-  rssiQueue = xQueueCreate(QUEUE_SIZE,sizeof(RSSI_VALUES));
+  rssiQueue = xQueueCreate(QUEUE_SIZE,sizeof(struct recvSignalStrength));
 
   //Create freertos tasks
   xTaskCreatePinnedToCore(logRssi, "logRssi", 1000, 1, &logRssiHandle, 1);
