@@ -58,7 +58,6 @@ void sendRssi(void *pvParameters){
         Serial.println("Data received from queue:");
       }
     }
-    //finish later gts
     
     //Convert RSSI values and timestamps to string format for MQTT publishing
     string rssiMsg = "";
