@@ -1,4 +1,4 @@
-//ESP32 Client Code ------ Version 2.2.0
+//ESP32 Client Code ------ Version 2.2.3
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <stdio.h>
@@ -10,10 +10,6 @@
 #define QUEUE_SIZE 5
 #define DEVICE_ID "ESP32_1" 
 
-//Declare WiFi and MQTT parameters
-const char* ssid = "RPI_456";
-const char* password = "";
-const char* mqtt_server = "10.42.0.1";
 
 //Initialize last message time, WiFi client, and MQTT client
 long lastMsg = 0;
@@ -71,17 +67,17 @@ void sendRssi(void *pvParameters){
     //Pass through MQTT to RPI 
     if (!client.connected()) {
       connect_mqttServer();
+      if(client.publish(mqttTopic, rssiMsg.c_str())){
+        Serial.println("[MQTT] Published data");
+      }
+      else{
+        Serial.println("[MQTT] Failed to publish data");
+      }
     }
 
     client.loop();
 
-    long now = millis();
-    if (now - lastMsg > 4000) {
-      lastMsg = now;
-      client.publish(mqttTopic, rssiMsg);
-      Serial.println("[MQTT] Published data");
-    }
-  }
+    
 }
 
 void setup(){
@@ -94,9 +90,8 @@ void setup(){
   rssiQueue = xQueueCreate(QUEUE_SIZE,sizeof(struct recvSignalStrength));
 
   //Create freertos tasks
-  xTaskCreatePinnedToCore(logRssi, "logRssi", 1000, 1, &logRssiHandle, 1);
-  xTaskCreatePinnedToCore(sendRssi, "sendRssi", 1000, 1, &sendRssiHandle, 1);
-
+  xTaskCreatePinnedToCore(logRssi, "logRssi", 1000, NULL, 1, &logRssiHandle, 1);
+  xTaskCreatePinnedToCore(sendRssi, "sendRssi", 1000, NULL, 1, &sendRssiHandle, 1);
 
 }
 void loop(){

@@ -1,10 +1,16 @@
-//Setup file -- Version 1.2.0
+//Setup file -- Version 1.3.0
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <stdio.h>
 #include "setup.h"
 #include <time.h>
 #include <Arduino.h>
+
+
+//Declare WiFi and MQTT parameters
+const char* ssid = "RPI_456";
+const char* password = "";
+const char* mqtt_server = "10.42.0.1";
 
 //Create wifi and MQTT connection
 void setup_wifi() {
