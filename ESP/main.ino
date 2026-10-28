@@ -1,4 +1,4 @@
-//ESP32 Client Code ------ Version 1.2.1
+//ESP32 Client Code ------ Version 2.0.1
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <freertos.h>
@@ -7,7 +7,8 @@
 #include <time.h>
 
 
-#define QUEUE_SIZE 5 
+#define QUEUE_SIZE 5
+#define DEVICE_ID "ESP32_1" 
 
 //Declare WiFi and MQTT parameters
 const char* ssid = "[WIFI_SSID]";
@@ -26,51 +27,53 @@ QueueHandle_t rssiQueue = NULL;
 
 //Use struct to hold RSSI values and timestamps
 struct recvSignalStrength {
-  volatile long timestamp;
-  volatile long lastRssi;
+  long timestamp;
+  long lastRssi;
 };
 
 //Logs and sends timestamped RSSI values to queue
 void logRssi(void *pvParameters){
+  recvSignalStrength rssiVals;
+
   for(;;){
 
-    recvSignalStrength rssiVals[QUEUE_SIZE][2]; //Array to hold  RSSI values and timestamps
     lastRssi = WiFi.RSSI(); //Log RSSI value (dBm)
     timestamp = getCurrentTime(); //Get current time since epoch (seconds)
-    for(uint8_t i = 0; i < QUEUE_SIZE; i++){
-      if(rssiVals[i][0].timestamp == 0){ //Check for empty slot in array
-        rssiVals[i][0].timestamp = timestamp;
-        rssiVals[i][1].lastRssi = lastRssi;
-        break;
-      }
-    }
-    char convertedVals [QUEUE_SIZE][2][20]; //Array to hold converted RSSI values and timestamps
-    snprintf(convertedVals[0][0], sizeof(convertedVals[0][0]), "%ld", lastRssi);
-    //Log Received Signal Strength Indicator (RSSI) values in array with timestamps, pass down queue
-    if(xQueueSend(rssiQueue, &rssiVals, portMAXDELAY)){
-      //Timestamp and RSSI values sent to queue successfully
-    }; 
+    xQueueSend(rssiQueue, &rssiVals, portMAX_DELAY); //Send RSSI values and timestamps to queue
+
+    vTaskDelay(100 / portTICK_PERIOD_MS); //Delay for 100 milliseconds
   }
 }
 
 void sendRssi(void *pvParameters){
+  recvSignalStrength rssiVals_R;
   //Create receiving array
-  recvSignalStrength rssiVals_R[QUEUE_SIZE][2];
+  recvSignalStrength rssiBatch[QUEUE_SIZE];
   for(;;){
-    recvSignalStrength rssiVals;
-    //Receive RSSI values and timestamps from queue
-    if(xQueueReceive(rssiQueue, &rssiVals, portMAXDELAY)){
-      //RSSI values and timestamps received from queue successfully
-      Serial.println("Data received from queue:");
-      //Print received RSSI values and timestamps to serial monitor
-      for(uint8_t i = 0; i < QUEUE_SIZE; i++){
-        Serial.print("Timestamp: ");
-        Serial.print(rssiVals[i][0].timestamp);
-        Serial.print(" | RSSI: ");
-        Serial.println(rssiVals[i][1].lastRssi);
+    
+    
+      
+    //Print received RSSI values and timestamps to serial monitor
+    for(uint8_t i = 0; i < QUEUE_SIZE; i++){
+      //Receive RSSI values and timestamps from queue
+      if(xQueueReceive(rssiQueue, &rssiVals_R, portMAX_DELAY)){
+        rssiBatch[i] = rssiVals_R;
+        //RSSI values and timestamps received from queue successfully
+        Serial.println("Data received from queue:");
       }
     }
-    //Pull rssi log, append device ID
+    //finish later gts
+    
+    //Convert RSSI values and timestamps to string format for MQTT publishing
+    char convertedVals [QUEUE_SIZE][2][20];
+    for(uint8_t i = 0; i < QUEUE_SIZE; i++){
+      snprintf(convertedVals[i][0], sizeof(convertedVals[i][0]), "%ld", rssiVals_R[i][0].timestamp);
+      snprintf(convertedVals[i][1], sizeof(convertedVals[i][1]), "%ld", rssiVals_R[i][1].lastRssi);
+    }
+    //Append device ID to MQTT topic for publishing
+    char mqttTopic[100];
+    snprintf(mqttTopic, sizeof(mqttTopic), "esp32/%s/rssi", DEVICE_ID);
+
     //Pass through MQTT to RPI 
     if (!client.connected()) {
       connect_mqttServer();
@@ -81,7 +84,7 @@ void sendRssi(void *pvParameters){
     long now = millis();
     if (now - lastMsg > 4000) {
       lastMsg = now;
-      client.publish("esp32/sensor1/rssi", rssiVals[i][j]);
+      client.publish(mqttTopic, convertedVals[i][1]);
       Serial.println("[MQTT] Published data");
     }
   }
