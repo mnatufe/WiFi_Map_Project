@@ -25,8 +25,8 @@ QueueHandle_t rssiQueue = NULL;
 
 //Use struct to hold RSSI values and timestamps
 struct recvSignalStrength {
-  long timestamp;
-  long lastRssi;
+  volatile long timestamp;
+  volatile long lastRssi;
 };
 
 //Logs and sends timestamped RSSI values to queue
@@ -46,8 +46,6 @@ void logRssi(void *pvParameters){
     char convertedVals [QUEUE_SIZE][2][20]; //Array to hold converted RSSI values and timestamps
     snprintf(convertedVals[0][0], sizeof(convertedVals[0][0]), "%ld", lastRssi);
     //Log Received Signal Strength Indicator (RSSI) values in array with timestamps, pass down queue
-
-    //Create loop to receive and log then send using below
     if(xQueueSend(rssiQueue, &rssiVals, portMAXDELAY)){
       //Timestamp and RSSI values sent to queue successfully
     }; 
