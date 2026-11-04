@@ -19,7 +19,10 @@ def on_disconnect(client, userdata, rc):
    
 # a callback functions 
 def callback_esp32_sensor1(client, userdata, msg):
-    print('ESP sensor data: ', msg.payload.decode('utf-8'))
+    global rssiVal  = float(msg.payload.decode('utf-8'))
+    print('ESP sensor data: ', rssiVal)
+    calculated_distance = calculate_rssi_distance_sensor1(rssiVal)
+    print(f"Calculated distance from RSSI: {calculated_distance:.2f} meters")
 
 
 def callback_esp32_sensor2(client, userdata, msg):
@@ -41,6 +44,16 @@ def client_subscriptions(client):
         print("WARNING: No MQTT message received for 10 seconds")
       time.sleep(1) 
 """
+
+def calculate_rssi_distance_sensor1(rssi):
+    # Constants for the path loss model
+    tx_power = -60  # RSSI value at 1 meter (in dBm)
+    n = 2.8         # Path loss exponent (environmental factor (indoor))
+
+    # Calculate distance using the path loss formula
+    distance = 10 ** ((tx_power - rssi) / (10 * n))
+    return distance
+
 # client = mqtt.Client("rpi_client1") #this should be a unique name
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, 'rpi_client1')
 flag_connected = 0
