@@ -20,7 +20,7 @@ def on_disconnect(client, userdata, rc):
    
 # a callback functions 
 def callback_esp32_sensor1(client, userdata, msg):
-    rssiVal  = float(msg.payload.decode('utf-8'))
+    rssiVal  = msg.payload.decode('utf-8')
     print('ESP sensor data: ', rssiVal)
     calculated_distance = calculate_rssi_distance_sensor1(rssiVal)
     print(f"Calculated distance from RSSI: {calculated_distance:.2f} meters")
@@ -47,6 +47,10 @@ def client_subscriptions(client):
 """
 
 def calculate_rssi_distance_sensor1(rssi):
+    for i in range(len(rssi)):
+        if rssi[i] == '-':
+            rssi = float(rssi[i:])  # Convert the substring starting from '-' to float
+            break
     # Constants for the path loss model
     tx_power = -60  # RSSI value at 1 meter (in dBm)
     n = 2.8         # Path loss exponent (environmental factor (indoor))
