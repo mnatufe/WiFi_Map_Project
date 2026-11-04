@@ -3,6 +3,7 @@ import time
 import threading
 
 TIMEOUT = 10
+rssiVal = 0.0
 #store time on prog star
 last_message_time = time.time()
 
@@ -19,7 +20,7 @@ def on_disconnect(client, userdata, rc):
    
 # a callback functions 
 def callback_esp32_sensor1(client, userdata, msg):
-    global rssiVal  = float(msg.payload.decode('utf-8'))
+    rssiVal  = float(msg.payload.decode('utf-8'))
     print('ESP sensor data: ', rssiVal)
     calculated_distance = calculate_rssi_distance_sensor1(rssiVal)
     print(f"Calculated distance from RSSI: {calculated_distance:.2f} meters")
