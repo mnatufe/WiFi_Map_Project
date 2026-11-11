@@ -6,7 +6,7 @@ TIMEOUT = 10
 rssiVal = 0.0
 #store time on prog star
 last_message_time = time.time()
-def calculate_rssi_distance_sensor1(rssi):
+def calculate_rssi_distance(rssi):
     for i in range(len(rssi)):
         if rssi[i] == '-':
             rssi = float(rssi[i:i+4])  # Convert the substring starting from '-' to float
@@ -34,8 +34,20 @@ def on_disconnect(client, userdata, rc):
 def callback_esp32_sensor1(client, userdata, msg):
     rssiVal  = msg.payload.decode('utf-8')
     print('ESP sensor data: ', rssiVal)
-    calculated_distance = calculate_rssi_distance_sensor1(rssiVal)
+    calculated_distance = calculate_rssi_distance(rssiVal)
     print(f"Calculated distance from RSSI: {calculated_distance:.2f} meters")
+
+def callback_esp32_sensor2(client, userdata, msg):
+    rssiVal2  = msg.payload.decode('utf-8')
+    print('ESP sensor data2: ', rssiVal)
+    calculated_distance2 = calculate_rssi_distance(rssiVal2)
+    print(f"Calculated distance from RSSI: {calculated_distance2:.2f} meters")
+
+def callback_esp32_sensor3(client, userdata, msg):
+    rssiVal3  = msg.payload.decode('utf-8')
+    print('ESP sensor data3: ', rssiVal3)
+    calculated_distance3 = calculate_rssi_distance(rssiVal3)
+    print(f"Calculated distance from RSSI: {calculated_distance3:.2f} meters")
 
 
 def callback_esp32_sensor2(client, userdata, msg):
