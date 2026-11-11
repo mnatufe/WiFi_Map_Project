@@ -11,4 +11,9 @@ def trilaterate(anchors, dists):
 
 anchors = [(0, 0), (5, 0), (0, 4)]
 dists   = [2.5, 3.6, 2.9]
-print(trilaterate(anchors, dists))   # -> [x, y]
+arr = trilaterate(anchors, dists)
+print(arr)   # -> [x, y]
+
+arr.tofile("position.csv", sep=",", header="x,y", comments="")
+
+
