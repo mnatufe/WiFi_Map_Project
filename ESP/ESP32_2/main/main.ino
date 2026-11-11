@@ -37,7 +37,7 @@ void logRssi(void *pvParameters){
     rssiVals.timestamp = getCurrentTime(); //Get current time since epoch (seconds)
     xQueueSend(rssiQueue, &rssiVals, portMAX_DELAY); //Send RSSI values and timestamps to queue
 
-    vTaskDelay(100 / portTICK_PERIOD_MS); //Delay for 100 milliseconds
+    vTaskDelay(50 / portTICK_PERIOD_MS); //Delay for 100 milliseconds
   }
 }
 
