@@ -6,6 +6,18 @@ TIMEOUT = 10
 rssiVal = 0.0
 #store time on prog star
 last_message_time = time.time()
+def calculate_rssi_distance_sensor1(rssi):
+    for i in range(len(rssi)):
+        if rssi[i] == '-':
+            rssi = float(rssi[i:i+4])  # Convert the substring starting from '-' to float
+            break
+    # Constants for the path loss model
+    tx_power = -62.5  # RSSI value at 1 meter (in dBm)
+    n = 2.8         # Path loss exponent (environmental factor (indoor))
+
+    # Calculate distance using the path loss formula
+    distance = 10 ** ((tx_power - rssi) / (10 * n))
+    return distance
 
 def on_connect(client, userdata, flags, rc):
    global flag_connected
@@ -45,19 +57,6 @@ def client_subscriptions(client):
         print("WARNING: No MQTT message received for 10 seconds")
       time.sleep(1) 
 """
-
-def calculate_rssi_distance_sensor1(rssi):
-    for i in range(len(rssi)):
-        if rssi[i] == '-':
-            rssi = float(rssi[i:])  # Convert the substring starting from '-' to float
-            break
-    # Constants for the path loss model
-    tx_power = -60  # RSSI value at 1 meter (in dBm)
-    n = 2.8         # Path loss exponent (environmental factor (indoor))
-
-    # Calculate distance using the path loss formula
-    distance = 10 ** ((tx_power - rssi) / (10 * n))
-    return distance
 
 # client = mqtt.Client("rpi_client1") #this should be a unique name
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, 'rpi_client1')
