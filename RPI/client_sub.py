@@ -77,6 +77,8 @@ flag_connected = 0
 client.on_connect = on_connect
 client.on_disconnect = on_disconnect
 client.message_callback_add('esp32/+/rssi', callback_esp32_sensor1)
+client.message_callback_add('esp32/+/rssi', callback_esp32_sensor2)
+client.message_callback_add('esp32/+/rssi', callback_esp32_sensor3)
 client.message_callback_add('rpi/broadcast', callback_rpi_broadcast)
 client.connect('10.42.0.1',1883)
 # start a new thread
