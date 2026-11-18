@@ -47,7 +47,7 @@ void connect_mqttServer() {
     }
 
     Serial.print("Attempting MQTT connection...");
-    if (client.connect("ESP32_client5")) {
+    if (client.connect("ESP32_1")) {
       Serial.println("connected");
       client.subscribe("rpi/broadcast");
     }

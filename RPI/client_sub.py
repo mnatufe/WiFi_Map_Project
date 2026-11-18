@@ -50,9 +50,6 @@ def callback_esp32_sensor3(client, userdata, msg):
     print(f"Calculated distance from RSSI: {calculated_distance3:.2f} meters")
 
 
-def callback_esp32_sensor2(client, userdata, msg):
-    print('ESP sensor2 data: ', str(msg.payload.decode('utf-8')))
-
 def callback_rpi_broadcast(client, userdata, msg):
     print('RPi Broadcast message:  ', str(msg.payload.decode('utf-8')))
     global last_message_time 
